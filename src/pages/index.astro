@@ -1,0 +1,100 @@
+---
+import { portfolio, type Screen } from '../config';
+import Icon from '../components/Icon.astro';
+import '../styles/global.css';
+import '@fontsource/barlow-condensed/600.css';
+import '@fontsource/barlow-condensed/700.css';
+import '@fontsource/dm-sans/400.css';
+import '@fontsource/dm-sans/500.css';
+import '@fontsource/dm-sans/600.css';
+import '@fontsource/ibm-plex-mono/400.css';
+import '@fontsource/ibm-plex-mono/500.css';
+const screens: Screen[] = portfolio.screens;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#161916" />
+    <meta name="description" content={`${portfolio.name} — ${portfolio.role}. An interactive portfolio. Choose a mission and explore.`} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preload" as="image" href={screens[0].image} />
+    <title>{portfolio.name} — {portfolio.brand}</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <div id="splash" class="splash" aria-label="Loading portfolio">
+      <span class="splash-mark">{portfolio.initials[0].toLowerCase()}<span>{portfolio.initials.slice(1).toLowerCase()}</span><i>®</i></span>
+      <p>{portfolio.brand} <span> / LOADING YOUR WORLD</span></p>
+      <div class="splash-track"><div id="splash-progress"></div></div>
+      <span class="splash-percent" id="splash-percent">0%</span>
+    </div>
+    <div class="world" aria-hidden="true">
+      {screens.map((screen, index) => <div class:list={['art-plate', { active: index === 0 }]} data-art={screen.id} style={`background:${screen.gradient}`}>
+        <img src={screen.image} alt="" fetchpriority={index === 0 ? 'high' : 'auto'} loading={index === 0 ? 'eager' : 'lazy'} />
+        {screen.video && <video muted loop playsinline preload="none" poster={screen.image}><source src={screen.video} type="video/mp4" /></video>}
+      </div>)}
+      <div class="world-shade"></div><div class="grain"></div>
+    </div>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="identity" href="#hero" aria-label={`${portfolio.name}, overview`}>
+          <span class="monogram">{portfolio.initials[0].toLowerCase()}<span>{portfolio.initials.slice(1).toLowerCase()}</span><i>®</i></span>
+          <span class="brand"><b>{portfolio.brand}<span class="brand-dot">.</span></b><span>A PORTFOLIO BY {portfolio.name.toUpperCase()}</span></span>
+        </a>
+        <div class="session"><span class="status-dot"></span> FREE ROAM <span class="session-line"></span><span>{portfolio.location.toUpperCase()}</span></div>
+        <div class="live-hud">
+          <div class="clock-group"><span class="hud-label">LOCAL TIME</span><time id="live-clock">00:00:00</time></div>
+          <div class="progression"><div id="wanted-stars" class="stars" aria-label="Exploration level 1 of 5">{Array.from({length:5},(_,i)=><span class:list={{earned:i===0}}>★</span>)}</div><span id="money" class="money">$001,250</span></div>
+        </div>
+      </header>
+      <nav class="navigation" aria-label="Portfolio sections">
+        <span class="nav-key" aria-hidden="true">[</span>
+        <div class="tab-list" role="tablist" aria-label="Explore portfolio">
+          {screens.map((screen,index)=><button type="button" role="tab" id={`tab-${screen.id}`} aria-controls={`screen-${screen.id}`} aria-selected={index===0?'true':'false'} tabindex={index===0?0:-1} data-screen={screen.id}><span class="tab-number">0{index+1}</span>{screen.label}<span class="tab-dot"></span></button>)}
+        </div>
+        <span class="nav-key" aria-hidden="true">]</span>
+      </nav>
+      <main id="main" tabindex="-1">
+        {screens.map((screen,index)=><section id={`screen-${screen.id}`} role="tabpanel" aria-labelledby={`tab-${screen.id}`} tabindex="0" class:list={['screen',`screen-${screen.id}`,{active:index===0}]} hidden={index!==0}>
+          <div class="screen-content">
+            <div class="eyebrow"><span class="eyebrow-line"></span>{screen.eyebrow}</div>
+            <h1>{screen.title.map((line,i)=><span class:list={{'accent-title':i===1}}>{line}</span>)}</h1>
+            <p class="description">{screen.description}</p>
+            {screen.id==='about' && <div class="profile-summary"><img src={portfolio.portrait} alt={portfolio.name} width="72" height="72" loading="lazy"/><div><strong>{portfolio.name}</strong><span>{portfolio.role} · {portfolio.location}</span><a href={portfolio.resume} download>Download résumé <Icon name="diagonal" size={14}/></a></div></div>}
+            {screen.id==='hero' && <>
+              <div class="hero-actions"><button class="button primary" data-go="projects">Explore my work <Icon name="arrow" size={19}/></button><button class="button secondary" data-go="contact">Let’s talk <Icon name="diagonal" size={18}/></button><a class="resume-link" href={portfolio.resume} download>Download résumé <Icon name="diagonal" size={15}/></a></div>
+              <div class="stats">{portfolio.stats.map(stat=><div><strong>{stat.value}</strong><span>{stat.label}</span></div>)}</div>
+            </>}
+            {screen.items && <div class:list={['items',{'skill-items':screen.id==='skills','project-items':screen.id==='projects','single-project':screen.id==='projects' && screen.items.length===1}]}>
+              {screen.items.map((item,i)=> screen.id==='projects' ?
+                <button class="project-card" data-project={i} aria-label={`View ${item.title} project`}><div class:list={['project-image',{'project-screenshot':!!item.gallery}]} style={`background-image:url('${item.image}')`}>{!item.gallery && <span class="project-wordmark">{item.title}</span>}<span class="project-open"><Icon name="diagonal" size={18}/></span></div><div class="project-info"><h2>{item.title}</h2><span>{item.meta.split('/')[1]}</span></div><p class="project-summary">{item.description}</p><span class="project-details-label">VIEW PROJECT DETAILS <Icon name="arrow" size={15}/></span></button> :
+                <article class="detail-item"><span class="item-meta">{item.meta}</span><h2>{item.title}</h2>{item.description && <p>{item.description}</p>}{item.level && <div class="skill-meter" role="meter" aria-label={item.title} aria-valuemin="0" aria-valuemax="100" aria-valuenow={item.level}><span style={`width:${item.level}%`}></span></div>}{item.tags && <div class="tags">{item.tags.map(tag=><span>{tag}</span>)}</div>}</article>
+              )}
+            </div>}
+            {screen.id==='services' && <button class="text-button" data-go="contact">Start a conversation <Icon name="diagonal" size={18}/></button>}
+            {screen.id==='contact' && <div class="contact-content"><a class="email-link" href={`mailto:${portfolio.email}`}>{portfolio.email}<Icon name="diagonal" size={24}/></a><div class="contact-facts"><a href={portfolio.phoneHref}>{portfolio.phone}</a><span><Icon name="pin" size={14}/>{portfolio.location}</span></div><div class="contact-actions"><button class="button primary" id="copy-email">Copy email <Icon name="copy" size={16}/></button><a class="button secondary" href={`mailto:${portfolio.email}?subject=Let%E2%80%99s%20make%20something%20great`}>Start a project <Icon name="mail" size={18}/></a><a class="resume-link" href={portfolio.resume} download>Download résumé <Icon name="diagonal" size={15}/></a></div><div class="socials">{portfolio.socials.map(social=><a href={social.href} target="_blank" rel="noopener noreferrer">{social.label}<Icon name="diagonal" size={14}/></a>)}</div><p class="response-note"><span class="status-dot"></span>{portfolio.contactNote}</p></div>}
+            {screen.id==='outro' && <div class="outro-content"><div class="completion"><span>YOUR EXPLORATION</span><strong id="completion-count">1 / 9</strong><div class="completion-track"><span id="completion-bar"></span></div></div><div class="hero-actions"><button class="button primary" data-go="contact">Make something together <Icon name="arrow" size={18}/></button><button class="button secondary" data-go="hero">Back to the beginning ↺</button></div></div>}
+          </div>
+        </section>)}
+        <div class="scene-caption"><span class="scene-caption-line"></span><div><span id="scene-location">{screens[0].location}</span><small id="scene-time">{screens[0].time}</small></div><span class="scene-coordinate">34°01′N<br/>118°29′W</span></div>
+      </main>
+      <footer class="bottom-hud">
+        <div class="minimap-group">
+          <button id="map-button" class="minimap" aria-label="Open exploration map"><span class="map-north">N</span><svg viewBox="0 0 180 110" aria-hidden="true"><defs><pattern id="map-grid" width="28" height="25" patternUnits="userSpaceOnUse" patternTransform="rotate(-25)"><path d="M0 0H28V25" fill="none" stroke="#b4b7a0" stroke-width="2"/><path d="M12 0V25" stroke="#b4b7a0" stroke-width="1" opacity=".4"/></pattern></defs><path d="M0 0H180V110H0Z" fill="#344640"/><path d="M55 0h125v110H80l-5-23-19-17 8-28Z" fill="#747864"/><path d="M55 0h125v110H80l-5-23-19-17 8-28Z" fill="url(#map-grid)"/><path d="M73-10 90 20 80 48 100 72 107 120" fill="none" stroke="#d1c9a8" stroke-width="4"/><path d="M100 72 134 55 150 27" fill="none" stroke="var(--accent)" stroke-width="3" stroke-dasharray="5 4" class="map-route"/><circle cx="150" cy="27" r="4" fill="var(--accent)"/><g id="map-player"><circle cx="100" cy="72" r="11" fill="var(--accent)" opacity=".2" class="map-pulse"/><path d="m100 65-5 13 5-3 5 3Z" fill="#fff5df"/></g></svg><span class="map-corner"></span></button>
+          <div class="map-caption"><span class="hud-label">CURRENT LOCATION</span><strong id="map-location">Pacific Coast</strong><span class="map-status"><span class="status-dot"></span> OPEN TO OPPORTUNITIES</span></div>
+        </div>
+        <div class="chapter-progress"><span><b id="current-number">01</b><i>/</i>09</span><div class="chapter-dots">{screens.map((screen,i)=><button class:list={{active:i===0}} data-go={screen.id} aria-label={`Go to ${screen.label}`} title={screen.label}></button>)}</div><small>TAKE YOUR TIME. LOOK AROUND.</small></div>
+        <div class="controls"><div class="availability"><span class="status-dot"></span>{portfolio.availability}</div><div class="control-row"><button class="keyboard-hint" id="help-button"><kbd>←</kbd><kbd>→</kbd><span>TO EXPLORE</span></button><span class="control-divider"></span><button class="icon-button" id="sound-button" aria-label="Enable navigation sounds" aria-pressed="false"><Icon name="mute" size={18}/></button><button class="icon-button" id="fullscreen-button" aria-label="Enter fullscreen"><Icon name="expand" size={18}/></button></div><span class="footer-note">© {portfolio.copyright} {portfolio.name.toUpperCase()} · BUILT TO EXPLORE</span></div>
+      </footer>
+    </div>
+    <div id="toast" class="toast" role="status" aria-live="polite"><span class="toast-star">★</span><div><strong id="toast-title">MISSION PASSED</strong><span id="toast-message">New territory explored. +$250</span></div></div>
+    <dialog id="map-dialog" class="menu-dialog"><button class="dialog-close icon-button" aria-label="Close map"><Icon name="close"/></button><span class="eyebrow">YOUR WORLD · YOUR PACE</span><h2>CHOOSE A DESTINATION.</h2><p>Explore all nine locations to complete your journey.</p><div class="destination-grid">{screens.map((screen,i)=><button data-go={screen.id}><span>0{i+1}</span><b>{screen.label}</b><span class="destination-status" data-visited={screen.id}>UNEXPLORED</span><Icon name="diagonal" size={17}/></button>)}</div></dialog>
+    <dialog id="help-dialog" class="menu-dialog help-dialog"><button class="dialog-close icon-button" aria-label="Close keyboard help"><Icon name="close"/></button><span class="eyebrow">THE CONTROLS</span><h2>MAKE YOURSELF AT HOME.</h2><dl><div><dt>Previous / next screen</dt><dd><kbd>←</kbd> <kbd>→</kbd> or <kbd>[</kbd> <kbd>]</kbd></dd></div><div><dt>Jump to a screen</dt><dd><kbd>1</kbd> — <kbd>9</kbd></dd></div><div><dt>First / last screen (in menu)</dt><dd><kbd>Home</kbd> <kbd>End</kbd></dd></div><div><dt>Move between controls</dt><dd><kbd>Tab</kbd></dd></div><div><dt>Close a window</dt><dd><kbd>Esc</kbd></dd></div></dl><p>Your discoveries are saved automatically on this device. Sound is off until you turn it on.</p></dialog>
+    <dialog id="project-dialog" class="menu-dialog project-dialog"><button class="dialog-close icon-button" aria-label="Close project"><Icon name="close"/></button><span class="eyebrow" id="project-meta"></span><h2 id="project-title"></h2><img class="project-dialog-image" id="project-image" alt="" /><div id="project-gallery" class="project-gallery" role="group" aria-label="Project screenshots"></div><p id="project-description"></p><ul id="project-features" class="project-features"></ul><div class="tags" id="project-tags"></div><div id="project-links" class="project-links"></div><button class="text-button" data-go="contact">Have something similar in mind? <Icon name="arrow" size={18}/></button></dialog>
+    <script is:inline id="portfolio-data" type="application/json" set:html={JSON.stringify(portfolio).replace(/</g,'\\u003c')} />
+    <script>import '../scripts/portfolio';</script>
+    <noscript><style>.splash{display:none}.screen[hidden]{display:block!important}.screen{min-height:80vh}.app-shell{height:auto;overflow:visible}.bottom-hud{position:relative}.navigation{display:none}main{overflow:visible}</style><p class="noscript-note">JavaScript is off. All portfolio sections are available below.</p></noscript>
+  </body>
+</html>
