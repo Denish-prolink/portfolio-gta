@@ -110,13 +110,11 @@ function navigate(index: number, options: { focus?: boolean; history?: boolean }
   }
   $('#scene-location').textContent = screen.location;
   $('#scene-time').textContent = screen.time;
-  $('#map-location').textContent = screen.location.toLowerCase().replace(/\b\w/g, letter => letter.toUpperCase());
   $('#current-number').textContent = String(index + 1).padStart(2, '0');
   $$('.chapter-dots button').forEach((dot, i) => {
     dot.classList.toggle('active', i === index);
     if (i === index) dot.setAttribute('aria-current', 'step'); else dot.removeAttribute('aria-current');
   });
-  gsap.to('#map-player', { x: Math.sin(index * 1.3) * 19, y: Math.cos(index * .8) * 16 - 16, duration, overwrite: true });
   visited.add(screen.id);
   saveProgress();
   updateProgress();
@@ -157,7 +155,11 @@ function navigateFromHash() {
 window.addEventListener('popstate', navigateFromHash);
 window.addEventListener('hashchange', navigateFromHash);
 
-$('#map-button').addEventListener('click', () => $<HTMLDialogElement>('#map-dialog').showModal());
+$('#map-button').addEventListener('click', () => {
+  const map = $<HTMLIFrameElement>('#location-map');
+  if (!map.getAttribute('src')) map.src = map.dataset.src!;
+  $<HTMLDialogElement>('#map-dialog').showModal();
+});
 $('#help-button').addEventListener('click', () => $<HTMLDialogElement>('#help-dialog').showModal());
 $$('.dialog-close').forEach(button => button.addEventListener('click', () => button.closest('dialog')?.close()));
 $$<HTMLDialogElement>('dialog').forEach(dialog => dialog.addEventListener('click', event => {

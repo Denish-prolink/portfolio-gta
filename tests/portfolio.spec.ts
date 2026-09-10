@@ -14,6 +14,7 @@ test('all nine destinations update the HUD and persist unique discoveries', asyn
     await expect(tabs.nth(index)).toHaveAttribute('aria-selected', 'true');
     await expect(page.getByRole('tabpanel')).toHaveCount(1);
     await expect(page.locator('#current-number')).toHaveText(`0${index + 1}`);
+    await expect(page.locator('#map-location')).toHaveText('Yogichowk, Surat, Gujarat 395010');
     const art = page.locator('.art-plate.active img');
     await expect.poll(() => art.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0);
     if ([2, 3, 7].includes(index)) {
@@ -34,6 +35,7 @@ test('all nine destinations update the HUD and persist unique discoveries', asyn
 });
 
 test('keyboard controls, deep links, map and project details work', async ({ page }) => {
+  await page.route('https://maps.google.com/**', route => route.fulfill({ body: '<p>Location map</p>', contentType: 'text/html' }));
   await page.goto('/#projects');
   await expect(page.locator('#splash')).toHaveCount(0);
   await expect(page.locator('#screen-projects')).toBeVisible();
@@ -54,8 +56,12 @@ test('keyboard controls, deep links, map and project details work', async ({ pag
   await expect(page.locator('#screen-hero')).toBeVisible();
   await page.keyboard.press('8');
   await expect(page.locator('#screen-contact')).toBeVisible();
-  await page.getByRole('button', { name: 'Open exploration map' }).click();
+  await page.getByRole('button', { name: 'Open map for Yogichowk, Surat, Gujarat 395010' }).click();
   await expect(page.locator('#map-dialog')).toBeVisible();
+  await expect(page.locator('#map-dialog')).toContainText('Yogichowk, Surat, Gujarat 395010');
+  const map = new URL((await page.locator('#location-map').getAttribute('src'))!);
+  expect(map.searchParams.get('q')).toBe('Yogichowk, Surat, Gujarat 395010, India');
+  await expect(page.getByRole('link', { name: 'Open in Google Maps' })).toHaveAttribute('href', /query=Yogichowk%2C%20Surat%2C%20Gujarat%20395010%2C%20India/);
   await page.locator('#map-dialog [data-go="skills"]').click();
   await expect(page.locator('#screen-skills')).toBeVisible();
   await expect(page.locator('#map-dialog')).not.toBeVisible();
@@ -89,6 +95,7 @@ test('missing art and reduced motion preserve usable content', async ({ page }) 
 });
 
 test('desktop composition, local clock and contact action', async ({ page, context }) => {
+  await context.route('https://mail.google.com/**', route => route.fulfill({ body: '<p>Email draft</p>', contentType: 'text/html' }));
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/');
@@ -98,7 +105,19 @@ test('desktop composition, local clock and contact action', async ({ page, conte
   await page.getByRole('button', { name: 'Let’s talk' }).click();
   await page.getByRole('button', { name: 'Copy email' }).click();
   expect(await page.evaluate(() => navigator.clipboard.readText())).toBe('denishkunjadiya02@gmail.com');
-  await expect(page.locator('.email-link')).toHaveAttribute('href', 'mailto:denishkunjadiya02@gmail.com');
+  for (const link of [page.locator('.email-link'), page.getByRole('link', { name: 'Start a project in Gmail' })]) {
+    const popupPromise = page.waitForEvent('popup');
+    await link.click();
+    const popup = await popupPromise;
+    await popup.waitForLoadState('domcontentloaded');
+    const draft = new URL(popup.url());
+    expect(draft.origin).toBe('https://mail.google.com');
+    expect(draft.searchParams.get('to')).toBe('denishkunjadiya02@gmail.com');
+    expect(draft.searchParams.get('view')).toBe('cm');
+    expect(draft.searchParams.get('su')).toBe('Let’s make something great');
+    await popup.close();
+  }
+  await expect(page.getByRole('link', { name: 'Use my email app' })).toHaveAttribute('href', /^mailto:denishkunjadiya02@gmail\.com\?subject=/);
   await expect(page.getByRole('link', { name: '+91 9054695107' })).toHaveAttribute('href', 'tel:+919054695107');
   await expect(page.getByRole('link', { name: 'WhatsApp' })).toHaveAttribute('href', 'https://wa.me/message/OPFGNVHU7PSBH1');
   await expect(page).toHaveTitle('Denish Kunjadiya — AFTER HOURS');
