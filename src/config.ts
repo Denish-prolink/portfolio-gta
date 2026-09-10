@@ -31,7 +31,8 @@ export const portfolio = {
   initials: 'DK',
   brand: 'AFTER HOURS',
   role: 'Software Engineer',
-  location: 'Gujarat, India',
+  location: 'Yogichowk, Surat, Gujarat 395010',
+  mapQuery: 'Yogichowk, Surat, Gujarat 395010, India',
   timezone: 'Asia/Kolkata',
   email: 'denishkunjadiya02@gmail.com',
   phone: '+91 9054695107',
@@ -50,7 +51,7 @@ export const portfolio = {
     { label: 'Upwork', href: 'https://www.upwork.com/freelancers/~010864920c893fa37c?mp_source=share' },
   ],
   stats: [
-    { value: '03+', label: 'YEARS OF EXPERIENCE' },
+    { value: '3+', label: 'YEARS OF EXPERIENCE' },
     { value: 'MERN', label: 'FULL-STACK DEVELOPMENT' },
     { value: '06', label: 'DEVELOPMENT SERVICES' },
   ],

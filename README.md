@@ -34,7 +34,7 @@ Personal content is migrated from Denish Kunjadiya's existing portfolio. The con
 
 ## Art plates and video
 
-Nine original AI-generated illustrations are included in `art-source/`. The site uses optimized WebP versions in `public/art/`, totaling about 1.3 MB for all nine images. Run `node scripts/optimize-art.mjs` to regenerate the WebP files. See **`PROMPTS.md`** for the complete reusable art direction system and scene prompts.
+Nine original AI-generated illustrations feature an adult anime software engineer in streetwear, with GTA-inspired coastal city views. PNG originals are included in `art-source/`; the site uses optimized WebP versions in `public/art/`. Run `node scripts/optimize-art.mjs` to regenerate the WebP files. See **`PROMPTS.md`** for the generation prompts.
 
 To replace an image, place it in `public/art/` and update the corresponding screen's `image` path. Aim for a landscape image with quiet space on the left and details on the right. Every screen has a CSS gradient fallback if its image is missing or fails to load.
 
