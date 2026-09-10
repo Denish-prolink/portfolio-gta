@@ -18,7 +18,7 @@ Personal details were read from the JavaScript-rendered pages at [Denish Kunjadi
 - Fiverr, RemoteHub, and Dribbble were labels without profile URLs on the old site. They are omitted from clickable social links pending actual URLs.
 - The live-demo and repository URLs are preserved as published; availability of those external destinations is controlled by their hosts.
 - Contact uses email, telephone, and social links. The old site's contact-form submission service was not copied or invoked.
-- The backgrounds now feature an adult anime software engineer in contemporary streetwear, with GTA-inspired coastal city views. Generation prompts are recorded in `PROMPTS.md`.
+- The backgrounds feature a realistic adult 3D game protagonist in contemporary streetwear, with software engineering activities and GTA-inspired coastal city views. Generation prompts are recorded in `PROMPTS.md`.
 - Home base is **Yogichowk, Surat, Gujarat 395010**. The decorative minimap opens an embedded Google map for that address; the contact and location links open Google Maps.
 - Primary email actions open a pre-addressed Gmail compose page. A standard email-app link and a copy-address button are also available.
 
